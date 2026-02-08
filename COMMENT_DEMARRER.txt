@@ -1,0 +1,57 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              COMMENT DÉMARRER L'APPLICATION ?                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 MÉTHODE SIMPLE (RECOMMANDÉE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Double-cliquer sur :  START_HERE.bat
+
+✅ Ça démarre tout automatiquement !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 MÉTHODE MANUELLE (si vous préférez)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Double-cliquer sur : start-backend.bat
+2. Attendre 3 secondes
+3. Double-cliquer sur : start-frontend.bat
+4. Ouvrir : http://localhost:5173
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 EN CAS DE PROBLÈME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ "Port 3000 déjà utilisé"
+   → Fermer les anciennes fenêtres Node.js
+   → Relancer START_HERE.bat
+
+❌ "Route non trouvée"
+   → Vérifier que les 2 serveurs tournent
+   → Backend : http://localhost:3000/health
+   → Frontend : http://localhost:5173
+
+❌ "ANTHROPIC_API_KEY non définie"
+   → Éditer le fichier .env
+   → Remplir votre clé API
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 TESTER L'APPLICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Aller sur : http://localhost:5173
+2. Onglet "Upload"
+3. Glisser un fichier Word ou PDF
+4. Cliquer "Analyser avec l'IA"
+5. Attendre 5-10 secondes
+6. Vérifier les données extraites
+7. Corriger si nécessaire
+8. Valider
+9. Voir dans "Historique"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Tout fonctionne maintenant !

@@ -1,0 +1,102 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          COMMENT PRÉPARER LE TEMPLATE WORD ?                  ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📄 Fichier template :
+   public/templates/fiche-retour-template.docx
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 ÉTAPES POUR PRÉPARER LE TEMPLATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ouvrir le fichier :
+   public/templates/fiche-retour-template.docx
+
+2. Remplacer les valeurs par des PLACEHOLDERS :
+
+   Là où il y a un champ à remplir, mettez :
+
+   Nom de l'élève : JAULIN
+   → Remplacer par : {nom}
+
+   Prénom : Lalita
+   → Remplacer par : {prenom}
+
+   Date de naissance : 09/07/2018
+   → Remplacer par : {date_naissance}
+
+   Classe : CE1
+   → Remplacer par : {classe}
+
+3. Sauvegarder le fichier
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 LISTE COMPLÈTE DES PLACEHOLDERS DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 INFORMATIONS ÉLÈVE :
+   {nom}               → Nom de l'élève (ex: JAULIN)
+   {prenom}            → Prénom (ex: Lalita)
+   {date_naissance}    → Date de naissance (ex: 09/07/2018)
+   {classe}            → Classe (ex: CE1)
+
+📌 ÉTABLISSEMENT :
+   {etablissement_nom}       → Nom (ex: Hector Ducamp)
+   {etablissement_adresse}   → Adresse complète
+   {etablissement_email}     → Email
+   {etablissement_tel}       → Téléphone
+
+📌 ORIGINE DE LA SAISINE :
+   {origine_saisine}   → Type (IEN / Chef établissement / DSDEN / Autre)
+   {origine_nom}       → Nom de la personne (ex: Mme Marie-Noëlle CHRISTOPHE)
+   {date_demande}      → Date de la demande
+
+📌 DEMANDES :
+   {demandes}          → Liste des demandes (formatée automatiquement)
+
+📌 TEMPS 1 (Propositions PRD) :
+   {temps1_date}       → Date de la proposition
+   {temps1_motifs}     → Liste des motifs sélectionnés
+   {temps1_commentaire}→ Commentaire libre
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✏️  EXEMPLE DE MODIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AVANT (dans le Word) :
+┌─────────────────────────────────────────┐
+│ NOM :  _______________                  │
+│ Prénom : _______________                │
+│ Date de naissance : __/__/____          │
+└─────────────────────────────────────────┘
+
+APRÈS (avec placeholders) :
+┌─────────────────────────────────────────┐
+│ NOM : {nom}                             │
+│ Prénom : {prenom}                       │
+│ Date de naissance : {date_naissance}    │
+└─────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  IMPORTANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Les placeholders DOIVENT commencer par { et finir par }
+- Respectez exactement l'orthographe (sensible à la casse)
+- Ne mettez PAS d'espaces : {nom} ✅  { nom } ❌
+- Gardez le format A4 du document
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Modifiez le template avec les placeholders
+2. Sauvegardez
+3. Redémarrez le backend (Ctrl+C puis npm run dev)
+4. Uploadez une fiche et validez-la
+5. Dans l'historique, cliquez sur 📄 "Générer PDF"
+6. Téléchargez le PDF et vérifiez qu'il est bien rempli
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Une fois le template prêt, la génération sera automatique !

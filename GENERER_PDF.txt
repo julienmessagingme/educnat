@@ -1,0 +1,60 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              GÉNÉRATION PDF - MODE D'EMPLOI                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ PLUS BESOIN DE LIBREOFFICE !
+
+Le PDF est généré automatiquement avec Puppeteer :
+  Word rempli → HTML → PDF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 WORKFLOW COMPLET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 📤 Upload fichier (Word/PDF)
+   ↓
+2. 🤖 IA extrait les données
+   ↓
+3. ✏️  Validation humaine (correction si besoin)
+   ↓
+4. 💾 Sauvegarde en base
+   ↓
+5. Dans l'historique : clic sur 📄 "Générer PDF"
+   ↓
+6. 🔄 Le système :
+   - Remplit le template Word avec les données
+   - Convertit Word → HTML
+   - Convertit HTML → PDF
+   ↓
+7. ⬇️  Téléchargement du PDF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 PRÉPARER LE TEMPLATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Fichier : public/templates/fiche-retour-template.docx
+
+Ouvrez-le et remplacez les valeurs par :
+
+  NOM : ____________  →  NOM : {nom}
+  Prénom : _________  →  Prénom : {prenom}
+  Date : ___/___/___  →  Date : {date_naissance}
+  etc.
+
+Voir PREPARER_TEMPLATE_WORD.txt pour la liste complète !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Installer puppeteer : npm install puppeteer
+2. Modifier le template Word avec les placeholders
+3. Redémarrer : START_HERE.bat
+4. Uploader une fiche → Valider
+5. Dans Historique → Clic 📄
+6. Attendre 5-10 secondes
+7. Clic ⬇️ pour télécharger
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ C'EST TOUT ! Pas besoin de LibreOffice !

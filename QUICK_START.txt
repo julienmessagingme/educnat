@@ -1,0 +1,74 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                  PRD AUTOMATION - DÉMARRAGE                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ Installation terminée !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 AVANT DE DÉMARRER (OBLIGATOIRE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Obtenir une clé API Claude : https://console.anthropic.com/
+2. Éditer le fichier .env
+3. Remplir : ANTHROPIC_API_KEY=sk-ant-votre_cle_ici
+
+⚠️  SANS LA CLÉ API, L'EXTRACTION IA NE FONCTIONNERA PAS !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 LANCER L'APPLICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ouvrir 2 terminaux dans le dossier prd-automation :
+
+📟 TERMINAL 1 (Backend) :
+    npm run dev
+
+📟 TERMINAL 2 (Frontend) :
+    cd client
+    npm run dev
+
+Ouvrir dans le navigateur : http://localhost:5173
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 TESTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Aller sur l'onglet "Upload"
+2. Glisser-déposer un fichier Word (.docx) ou PDF
+3. Cliquer "Analyser avec l'IA"
+4. ⏳ Attendre 5-10 secondes
+5. ✏️  Vérifier les données extraites par l'IA
+6. Corriger si besoin
+7. ✅ Valider
+8. Voir dans "Historique"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README.md                 - Documentation complète
+START.md                  - Guide de démarrage détaillé
+IMPLEMENTATION_STATUS.md  - État d'avancement du projet
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ FONCTIONNALITÉS ACTUELLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Upload fichiers Word/PDF
+✅ Extraction IA intelligente (gère les variations de format)
+✅ Formulaire de validation pré-rempli
+✅ Historique des fiches
+✅ Recherche et filtres
+✅ Suppression de fiches
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔮 PROCHAINES ÉTAPES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Phase 2 : Génération du PDF de retour de saisine
+Phase 3 : Formulaire Temps 1/Temps 2 (propositions PRD)
+Phase 4 : Déploiement sur VPS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bon test ! 🚀
