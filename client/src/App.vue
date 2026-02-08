@@ -1,9 +1,18 @@
 <template>
-  <div class="app">
+  <!-- Écran de login -->
+  <Login v-if="!isLoggedIn" @logged-in="onLoggedIn" />
+
+  <!-- Application principale -->
+  <div v-else class="app">
     <header class="header">
-      <div class="container">
-        <h1>📋 PRD Automation</h1>
-        <p>Traitement automatisé des fiches de saisine PRD</p>
+      <div class="container header-row">
+        <div>
+          <h1>📋 PRD Automation</h1>
+          <p>Traitement automatisé des fiches de saisine PRD</p>
+        </div>
+        <button class="btn-logout" @click="handleLogout">
+          Déconnexion
+        </button>
       </div>
     </header>
 
@@ -70,11 +79,24 @@
 
 <script setup>
 import { ref } from 'vue'
+import Login from './components/Login.vue'
 import FileUpload from './components/FileUpload.vue'
 import DataValidation from './components/DataValidation.vue'
 import PropositionForm from './components/PropositionForm.vue'
 import PDFPreview from './components/PDFPreview.vue'
 import FichesList from './components/FichesList.vue'
+import api from './services/api'
+
+const isLoggedIn = ref(!!localStorage.getItem('token'))
+
+function onLoggedIn() {
+  isLoggedIn.value = true
+}
+
+async function handleLogout() {
+  await api.logout()
+  isLoggedIn.value = false
+}
 
 const currentTab = ref('upload')
 const uploadedFicheId = ref(null)
@@ -138,6 +160,28 @@ function resetUpload() {
   color: white;
   padding: 2rem 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-logout {
+  padding: 0.5rem 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
 }
 
 .header h1 {

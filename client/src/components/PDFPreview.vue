@@ -8,7 +8,7 @@
 
       <div class="preview-container">
         <iframe
-          :src="pdfUrl"
+          :src="pdfUrlWithToken"
           class="pdf-iframe"
           frameborder="0"
         ></iframe>
@@ -22,7 +22,7 @@
           ← Revenir en arrière
         </button>
         <a
-          :href="pdfUrl + '?download=true'"
+          :href="pdfUrlWithToken + '&download=true'"
           class="btn-primary"
           target="_blank"
         >
@@ -40,6 +40,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   ficheId: {
     type: Number,
@@ -52,6 +54,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['finish', 'back'])
+
+const pdfUrlWithToken = computed(() => {
+  const token = localStorage.getItem('token')
+  return `${props.pdfUrl}?token=${token}`
+})
 
 function handleFinish() {
   emit('finish')

@@ -13,6 +13,7 @@ const { getDatabase } = require('./db/database');
 const { initDatabase } = require('./db/init');
 
 // Routes
+const { router: authRoutes, requireAuth } = require('./routes/auth');
 const uploadRoutes = require('./routes/upload');
 const fichesRoutes = require('./routes/fiches');
 const pdfRoutes = require('./routes/pdf');
@@ -82,10 +83,11 @@ app.use((req, res, next) => {
 });
 
 // Routes API
-app.use('/api/upload', uploadLimiter, uploadRoutes);
-app.use('/api/fiches', fichesRoutes);
-app.use('/api/fiches', pdfRoutes);
-app.use('/api/propositions', propositionsRoutes);
+app.use('/api', authRoutes);                                   // login/logout (public)
+app.use('/api/upload', requireAuth, uploadLimiter, uploadRoutes);
+app.use('/api/fiches', requireAuth, fichesRoutes);
+app.use('/api/fiches', requireAuth, pdfRoutes);
+app.use('/api/propositions', requireAuth, propositionsRoutes);
 
 // Route de santé
 app.get('/health', (req, res) => {
