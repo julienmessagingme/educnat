@@ -18,6 +18,7 @@ const uploadRoutes = require('./routes/upload');
 const fichesRoutes = require('./routes/fiches');
 const pdfRoutes = require('./routes/pdf');
 const propositionsRoutes = require('./routes/propositions');
+const analysesRoutes = require('./routes/analyses');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -88,6 +89,7 @@ app.use('/api/upload', requireAuth, uploadLimiter, uploadRoutes);
 app.use('/api/fiches', requireAuth, fichesRoutes);
 app.use('/api/fiches', requireAuth, pdfRoutes);
 app.use('/api/propositions', requireAuth, propositionsRoutes);
+app.use('/api/analyses', requireAuth, analysesRoutes);
 
 // Route de santé
 app.get('/health', (req, res) => {

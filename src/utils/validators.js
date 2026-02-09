@@ -24,6 +24,7 @@ const propositionSchema = z.object({
   dateProposition: z.string().regex(/^\d{4}-\d{2}-\d{2}$|^\d{2}\/\d{2}\/\d{4}$/, 'Format de date invalide'),
   motifsPrincipaux: z.array(z.string()).optional().default([]),
   evaluationSituation: z.array(z.string()).optional().default([]),
+  customMotif: z.string().optional().nullable(),
   commentaire: z.string().optional().nullable(),
   temps2Date: z.string().regex(/^\d{4}-\d{2}-\d{2}$|^\d{2}\/\d{2}\/\d{4}$/, 'Format de date invalide').or(z.literal('')).optional().nullable(),
   temps2Commentaire: z.string().optional().nullable()

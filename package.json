@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "nodemon --ignore uploads/ --ignore output/ --ignore data/ --ignore logs/ --ignore client/ src/server.js",
     "init-db": "node src/db/init.js",
     "test": "echo \"Tests à implémenter\" && exit 0"
   },
@@ -30,7 +30,6 @@
     "multer": "^2.0.0-rc.4",
     "pdf-parse": "^1.1.1",
     "pizzip": "^3.1.6",
-    "puppeteer": "^22.15.0",
     "sql.js": "^1.10.3",
     "winston": "^3.11.0",
     "zod": "^3.22.4"

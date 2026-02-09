@@ -1,355 +1,110 @@
-# 📋 PRD Automation - Documentation Claude
+# PRD Automation
 
-## 🎯 Vue d'ensemble
+Application web pour automatiser les fiches de saisine PRD (Education Nationale).
 
-Application web pour automatiser le traitement des fiches de saisine PRD (Pôle Ressources Départemental) de l'Éducation Nationale.
+## Deployment
 
-**Workflow complet :**
-```
-Fichier source (Word/PDF)
-  → Extraction IA (Claude API)
-  → Validation manuelle
-  → Formulaire Temps 1 (propositions PRD)
-  → Remplissage template Word (docxtemplater)
-  → Conversion PDF (LibreOffice headless)
-  → Visualisation + Téléchargement
-```
+- **Production** : https://educnat.messagingme.app
+- **VPS** : ubuntu@146.59.233.252 - `/home/ubuntu/educnat/`
+- **Docker** : conteneur `educnat-app`, port 3005, Nginx Proxy Manager + SSL
+- **GitHub** : https://github.com/julienmessagingme/educnat
+- **Local** : http://localhost:3000 (backend) / http://localhost:5173 (vite dev)
 
-## 🏗️ Stack Technique
+## Stack
 
-### Backend
-- **Node.js** + **Express.js**
-- **better-sqlite3** (base de données locale)
-- **Claude API** (extraction IA via @anthropic-ai/sdk)
-- **mammoth** (conversion Word → HTML pour extraction)
-- **docxtemplater** (remplissage template Word)
-- **LibreOffice headless** (conversion Word → PDF)
-- **multer** (upload fichiers)
-- **zod** (validation)
+- **Backend** : Node.js + Express + sql.js (SQLite in-memory, sauvé sur disque)
+- **Frontend** : Vue.js 3 (Composition API) + Vite + Axios
+- **Extraction** : Claude API (claude-3-5-haiku) + parsing XML Word (surlignage)
+- **PDF** : docxtemplater (remplissage template .docx) + LibreOffice headless (conversion PDF)
+- **Auth** : 2 users hardcodés (SHA-256), tokens en mémoire
 
-### Frontend
-- **Vue.js 3** (Composition API) + **Vite**
-- **axios** (requêtes HTTP)
-
-## 📁 Structure du Projet
+## Workflow utilisateur
 
 ```
-prd-automation/
-├── src/
-│   ├── server.js                      # Point d'entrée Express
-│   ├── config/
-│   │   └── upload.js                  # Config Multer
-│   ├── db/
-│   │   ├── database.js                # Wrapper better-sqlite3
-│   │   ├── schema.sql                 # Schéma SQLite
-│   │   ├── init.js                    # Initialisation BDD
-│   │   ├── migrate.js                 # Script de migration
-│   │   └── update_demandes.js         # MAJ des types de demandes
-│   ├── services/
-│   │   ├── extraction/
-│   │   │   ├── wordExtractor.js       # Extraction Word (mammoth)
-│   │   │   ├── pdfExtractor.js        # Extraction PDF (pdf-parse)
-│   │   │   └── aiExtractor.js         # Extraction IA (Claude API)
-│   │   ├── template/
-│   │   │   └── wordTemplateFiller.js  # Injection données (docxtemplater)
-│   │   └── pdf/
-│   │       └── pdfGenerator.js        # Génération PDF (LibreOffice)
-│   ├── routes/
-│   │   ├── upload.js                  # POST /api/upload
-│   │   ├── fiches.js                  # CRUD fiches
-│   │   ├── pdf.js                     # GET /api/fiches/:id/pdf
-│   │   └── propositions.js            # CRUD propositions
-│   ├── models/
-│   │   └── Fiche.js                   # Modèle Fiche
-│   └── utils/
-│       ├── logger.js                  # Winston
-│       └── validators.js              # Schémas Zod
-├── public/
-│   └── templates/
-│       └── fiche-retour-template.docx # Template Word avec placeholders
-├── client/                            # Frontend Vue.js
-│   ├── src/
-│   │   ├── App.vue                    # Composant principal
-│   │   ├── main.js
-│   │   ├── components/
-│   │   │   ├── FileUpload.vue         # Upload fichier
-│   │   │   ├── DataValidation.vue     # Validation données
-│   │   │   ├── PropositionForm.vue    # Formulaire Temps 1
-│   │   │   ├── PDFPreview.vue         # Prévisualisation PDF
-│   │   │   └── FichesList.vue         # Liste historique
-│   │   └── services/
-│   │       └── api.js                 # Axios wrapper
-│   └── vite.config.js
-├── uploads/                           # Fichiers uploadés
-├── output/                            # PDFs générés
-├── data/                              # Base SQLite
-└── logs/                              # Logs Winston
+Upload Word/PDF → Extraction IA → Validation manuelle → Formulaire Temps 1/2 → PDF
 ```
 
-## 🗄️ Base de Données SQLite
+1. **FileUpload.vue** : upload fichier → `POST /api/upload` → extraction wordExtractor + aiExtractor
+2. **DataValidation.vue** : édition données extraites → `PUT /api/fiches/:id/validate`
+3. **PropositionForm.vue** : Temps 1 (date, 10 motifs PRD, commentaire) + Temps 2 (évaluation, date, commentaire) → `POST /api/propositions`
+4. **PDFPreview.vue** : iframe + téléchargement → `GET /api/fiches/:id/pdf?token=...`
 
-### Tables principales
+## Structure clé
 
-**fiches** - Stocke les fiches de saisine
-- Métadonnées fichier source (filename, type, path)
-- Données élève (nom, prénom, date_naissance, classe)
-- Établissement (nom, adresse, email, tel)
-- Origine saisine (type, nom)
-- Demandes formulées (JSON array)
-- PDF généré (pdf_output_path)
-- Statuts (pending, validated, completed)
-
-**propositions** - Propositions PRD (Temps 1/2)
-- fiche_id, temps (1 ou 2)
-- date_proposition
-- motifs_principaux (JSON array)
-- evaluation_situation (JSON array) ← **AJOUTÉ**
-- commentaire
-
-**types_demande** - Référentiel des 11 types de demandes
-**motifs_principaux** - Référentiel des motifs (7 choix)
-
-## 🔑 Placeholders du Template Word
-
-Le fichier `public/templates/fiche-retour-template.docx` contient ces placeholders :
-
-### Identification élève
-- `{nom}` - Nom en MAJUSCULES
-- `{prenom}` - Prénom
-- `{date_naissance}` - Format DD/MM/YYYY
-- `{classe}` - Classe (ex: CE1)
-
-### Établissement
-- `{etablissement_nom}`
-- `{etablissement_adresse}`
-- `{etablissement_email}`
-- `{etablissement_tel}`
-
-### Origine saisine
-- `{origine_saisine}` - Type (IEN, Chef établissement, DSDEN, Autre)
-- `{origine_nom}` - Nom de la personne
-- `{date_demande}` - Date DD/MM/YYYY
-
-### Demandes formulées (croix si cochée)
-- `{d1}` - Sensibilisation, formation aux équipes
-- `{d2}` - Posture professionnelle
-- `{d3}` - Gestes professionnels
-- `{d4}` - Pédagogie auprès des élèves
-- `{d5}` - Aménagement de l'espace classe
-- `{d6}` - Expertise troubles du comportement
-- `{d7}` - Expertise TSA apports pédagogiques
-- `{d8}` - Expertise TSA accompagnement AESH
-- `{d9}` - Expertise trouble neurodév.
-- `{d10}` - Appui communauté éducative
-- `{d11}` - Parcours scolaire/soin
-
-### Temps 1 - Propositions PRD
-- `{temps1_date}` - Date au format DD/MM/YYYY
-- `{temps1_motifs}` - Liste des motifs sélectionnés
-- `{temps1_commentaire}` - Commentaire libre
-
-### Évaluation de la situation (croix si cochée)
-- `{eval1}` - Stabilisation suivi circonscription
-- `{eval2}` - Stabilisation suivi PRD
-- `{eval3}` - Actions complémentaires
-- `{eval4}` - Equipe technique
-- `{eval5}` - Situation clôturée
-
-## 📝 Suivi des Modifications Récentes
-
-### 2026-02-07 - Session complète
-
-#### ✅ Corrections bugs critiques
-1. **Erreur syntaxe pdfGenerator.js** - Variable `db` déclarée 2 fois (ligne 185) → Supprimé duplication
-2. **Port 3000 déjà utilisé** - Processus zombie tué avant chaque redémarrage
-3. **PDF vide et format non respecté** - Remplacé mammoth+puppeteer par **LibreOffice headless**
-
-#### ✅ Fonctionnalités ajoutées
-
-**1. Affichage PDF dans iframe**
-- Modifié route GET /api/fiches/:id/pdf pour afficher inline (au lieu de forcer téléchargement)
-- Ajout query param `?download=true` pour télécharger
-- Frontend : iframe affiche le PDF directement
-
-**2. Boutons "Revenir en arrière"**
-- PropositionForm : retour vers DataValidation
-- PDFPreview : retour vers PropositionForm
-- Gestion des événements `@back` dans App.vue
-
-**3. Purge de l'historique**
-- Bouton "🗑️ Purger l'historique" dans FichesList
-- Double confirmation avant suppression
-- Route DELETE /api/fiches (sans ID) pour tout supprimer
-- Supprime fiches + fichiers (source + PDF)
-
-**4. Évaluation de la situation** ⭐ NOUVEAU
-- Ajout section dans PropositionForm (5 choix multiples)
-- Champ `evaluation_situation` ajouté à table propositions
-- Placeholders `{eval1}` à `{eval5}` dans template
-- Croix "X" apparaissent pour choix cochés
-
-**5. Détection des 11 demandes** ⭐ NOUVEAU
-- Mise à jour de la liste des demandes (8 → 11 types)
-- Amélioration prompt IA pour détecter cases cochées + surlignage
-- Placeholders `{d1}` à `{d11}` dans template
-- Codes mis à jour : SENSIBILISATION, POSTURE_PRO, GESTES_PRO, etc.
-
-#### ✅ Corrections validation
-- Validateur Zod : email plus permissif (accepte chaîne vide)
-- Ajout `evaluationSituation` dans propositionSchema
-
-#### 🔧 Configuration LibreOffice
-- Chemin Windows : `C:\Program Files\LibreOffice\program\soffice.exe`
-- Variable d'env : `LIBREOFFICE_PATH` (optionnel)
-- Conversion en mode headless : `--headless --convert-to pdf`
-
-## 🚀 Commandes Utiles
-
-### Démarrage en localhost
-```bash
-# Backend
-cd C:\users\julie\educnat\prd-automation
-node src/server.js
-
-# Frontend (build)
-cd client
-npm run build
-
-# Frontend (dev)
-cd client
-npm run dev
+```
+src/
+  server.js                           # Express, routes, auth middleware
+  routes/auth.js                      # POST /login, /logout, requireAuth middleware
+  routes/upload.js                    # Upload + extraction
+  routes/fiches.js                    # CRUD fiches
+  routes/pdf.js                       # Génération + affichage PDF
+  routes/propositions.js              # CRUD propositions
+  services/extraction/wordExtractor.js  # Parse XML Word, détecte [SURLIGNÉ], demandes, origine
+  services/extraction/aiExtractor.js    # Prompt Claude pour extraction structurée
+  services/template/wordTemplateFiller.js  # Injecte données dans template Word
+  services/pdf/pdfGenerator.js        # LibreOffice --headless --convert-to pdf
+  db/database.js                      # Wrapper sql.js (API compatible better-sqlite3)
+  db/init.js                          # Schéma + migrations auto au démarrage
+  db/schema.sql                       # Tables: fiches, propositions, types_demande, motifs_principaux
+  utils/validators.js                 # Zod: ficheSchema, propositionSchema
+  models/Fiche.js                     # CRUD model
+client/src/
+  App.vue                             # Login gate + navigation tabs + workflow
+  components/Login.vue                # Email/password → token localStorage
+  components/FileUpload.vue           # Drag-drop upload
+  components/DataValidation.vue       # Formulaire validation données
+  components/PropositionForm.vue      # 10 choix PRD + Temps 2
+  components/PDFPreview.vue           # iframe PDF + download
+  components/FichesList.vue           # Historique + purge
+  services/api.js                     # Axios + intercepteur token Bearer
+public/templates/fiche-retour-template.docx  # Template Word avec placeholders
 ```
 
-### Accès
-- Application : http://localhost:3000
-- API : http://localhost:3000/api
-- Health check : http://localhost:3000/health
+## BDD (SQLite via sql.js)
 
-### Base de données
-```bash
-# Initialiser la BDD
-node src/db/init.js
+**fiches** : nom, prenom, date_naissance, classe, etablissement_*, origine_*, demandes_formulees (JSON), status (pending→validated→completed), pdf_output_path
 
-# Migrer (ajouter evaluation_situation)
-node src/db/migrate.js
+**propositions** : fiche_id, temps, date_proposition, motifs_principaux (JSON), evaluation_situation (JSON), commentaire, temps2_date, temps2_commentaire
 
-# Mettre à jour les demandes (11 types)
-node src/db/update_demandes.js
-```
+**Attention** : sql.js charge toute la BDD en mémoire au démarrage. `saveDatabase()` écrit sur disque après chaque write. Les migrations sont dans `init.js` (ALTER TABLE avec try/catch).
 
-### Tuer le serveur (Windows)
-```bash
-netstat -ano | grep :3000 | grep LISTENING
-taskkill //F //PID <PID>
-```
+## Placeholders du template Word
 
-## ⚠️ Points Importants
+Eleve: `{nom}`, `{prenom}`, `{date_naissance}`, `{classe}`
+Etablissement: `{etablissement_nom}`, `{etablissement_adresse}`, `{etablissement_email}`, `{etablissement_tel}`
+Origine: `{origine_saisine}`, `{origine_nom}`, `{date_demande}`
+Demandes (X si cochée): `{d1}`..`{d11}`
+Temps 1: `{temps1_date}`, `{temps1_motifs}`, `{temps1_commentaire}`
+Temps 2: `{temps2_date}`, `{temps2_commentaire}`
+Evaluation (X si cochée): `{eval1}`..`{eval5}`
 
-### 1. LibreOffice est OBLIGATOIRE
-- Doit être installé sur le système (localhost + VPS)
-- Windows : `C:\Program Files\LibreOffice\program\soffice.exe`
-- Linux/VPS : `libreoffice` via apt/apk
-- Docker : `RUN apk add --no-cache libreoffice ttf-dejavu fontconfig`
+## Les 10 choix PRD (PropositionForm + wordTemplateFiller)
 
-### 2. Template Word
-- Fichier : `public/templates/fiche-retour-template.docx`
-- **NE PAS remplacer par HTML** - docxtemplater nécessite .docx
-- Tous les placeholders doivent être entre `{}`
-- Format A4 préservé par LibreOffice
+Codes CHOIX_1 à CHOIX_10. Contiennent `{prenom_enfant}` remplacé par `de Lalita` ou `d'Arthur` selon voyelle/consonne (fonction `dePrenom()`). Définis en dur dans le frontend ET le backend.
 
-### 3. Extraction IA
-- Nécessite `ANTHROPIC_API_KEY` en variable d'environnement
-- Modèle : claude-3-haiku-20240307
-- Détecte automatiquement demandes cochées/surlignées
-- Coût : ~0.25$ / 1M tokens input, ~1.25$ / 1M tokens output
+## Auth
 
-### 4. Workflow utilisateur
-1. Upload fichier Word/PDF
-2. Validation données extraites (éditable)
-3. Formulaire Temps 1 :
-   - Date proposition
-   - Motifs principaux (choix multiple)
-   - Évaluation situation (choix multiple) ← NOUVEAU
-   - Commentaire libre
-4. Génération PDF automatique
-5. Prévisualisation + Téléchargement
+2 users dans `src/routes/auth.js` (SHA-256 hashés). Token random en mémoire (Set). Le middleware `requireAuth` vérifie header `Authorization: Bearer <token>` OU query param `?token=` (pour iframe PDF).
 
-## 🐛 Problèmes Connus & Solutions
+## Extraction Word (wordExtractor.js)
 
-### 1. "Données invalides" après upload
-**Cause :** Validateur Zod rejette les données
-**Solution :** Vérifier validators.js, assouplir les contraintes si besoin
+1. Parse `word/document.xml` du .docx via PizZip
+2. Détecte `<w:highlight>` et `<w:shd>` → marque avec `[SURLIGNÉ]...[/SURLIGNÉ]`
+3. Coupe le surlignage à chaque saut de ligne (1 demande = 1 bloc)
+4. `detecterDemandesSurlignees()` : match les 11 codes via mots-clés
+5. `detecterOrigine()` : cherche pattern "L'IEN : Mme Nom" ligne par ligne
+6. L'IA extrait le reste (nom, prenom, etablissement, etc.)
+7. Les demandes détectées par le code REMPLACENT celles de l'IA
 
-### 2. PDF vide ou mal formaté
-**Cause :** LibreOffice pas installé ou template sans placeholders
-**Solution :** Vérifier installation LibreOffice + placeholders template
+## Commandes disponibles
 
-### 3. Port 3000 déjà utilisé
-**Cause :** Serveur Node zombie
-**Solution :** `netstat -ano | grep :3000` puis `taskkill //F //PID <PID>`
+- `/push` : commit + push GitHub
+- `/deploy` : commit + push + déploiement VPS via SSH
 
-### 4. Erreur "Assertion failed: UV_HANDLE_CLOSING"
-**Cause :** Bug better-sqlite3 à la fermeture
-**Solution :** Ignorer, ne bloque pas le fonctionnement
+## Conventions
 
-## 📋 TODOs / Améliorations Futures
-
-### Priorité haute
-- [ ] Tester la détection des 11 demandes avec fichiers réels
-- [ ] Vérifier que les croix s'affichent correctement dans le PDF
-- [ ] Valider le format A4 du PDF généré
-
-### Priorité moyenne
-- [ ] Ajouter gestion Temps 2 (propositions de suivi)
-- [ ] Export Excel de l'historique
-- [ ] Recherche avancée dans l'historique
-- [ ] Notifications par email lors de la génération PDF
-
-### Priorité basse
-- [ ] Multi-utilisateurs avec authentification
-- [ ] Tableau de bord statistiques
-- [ ] API REST documentée (Swagger)
-
-## 🚢 Déploiement VPS (Phase 4 - À venir)
-
-**⚠️ NE PAS déployer avant validation complète en localhost**
-
-### Prérequis VPS
-- Node.js 18+
-- LibreOffice (via apt/apk)
-- Nginx (reverse proxy)
-- PM2 (gestion processus)
-- SSL/TLS (Let's Encrypt)
-
-### Installation LibreOffice sur VPS
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install libreoffice --no-install-recommends
-
-# Docker Alpine
-RUN apk add --no-cache libreoffice ttf-dejavu fontconfig
-```
-
-### Variables d'environnement production
-```env
-NODE_ENV=production
-PORT=3000
-DATABASE_PATH=/app/data/prd.db
-UPLOAD_DIR=/app/uploads
-OUTPUT_DIR=/app/output
-ANTHROPIC_API_KEY=sk-ant-...
-LIBREOFFICE_PATH=/usr/bin/libreoffice
-```
-
-## 📞 Contact & Support
-
-- **Utilisateur :** Julie (Éducation Nationale)
-- **Projet :** PRD Automation
-- **Localisation :** C:\users\julie\educnat\prd-automation
-
----
-
-**Dernière mise à jour :** 2026-02-07
-**Version :** 1.0.0
-**Statut :** ✅ Fonctionnel en localhost
+- camelCase côté frontend, snake_case côté BDD
+- Zod pour validation (accepte chaînes vides avec `.or(z.literal(''))`)
+- Pas de process.exit() dans init.js (le serveur doit survivre aux erreurs d'init)
+- Migrations dans init.js avec try/catch (ALTER TABLE idempotent)
+- LibreOffice : Windows `C:\Program Files\LibreOffice\program\soffice.exe`, Linux `/usr/bin/libreoffice`

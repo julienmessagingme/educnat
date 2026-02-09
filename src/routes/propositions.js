@@ -55,6 +55,7 @@ router.post('/', async (req, res) => {
         UPDATE propositions
         SET date_proposition = ?,
             motifs_principaux = ?,
+            custom_motif = ?,
             evaluation_situation = ?,
             commentaire = ?,
             temps2_date = ?,
@@ -63,6 +64,7 @@ router.post('/', async (req, res) => {
       `).run(
         validatedData.dateProposition,
         JSON.stringify(validatedData.motifsPrincipaux || []),
+        validatedData.customMotif || null,
         JSON.stringify(validatedData.evaluationSituation || []),
         validatedData.commentaire || null,
         validatedData.temps2Date || null,
@@ -81,13 +83,14 @@ router.post('/', async (req, res) => {
     } else {
       // Créer
       const result = db.prepare(`
-        INSERT INTO propositions (fiche_id, temps, date_proposition, motifs_principaux, evaluation_situation, commentaire, temps2_date, temps2_commentaire)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO propositions (fiche_id, temps, date_proposition, motifs_principaux, custom_motif, evaluation_situation, commentaire, temps2_date, temps2_commentaire)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         validatedData.ficheId,
         validatedData.temps,
         validatedData.dateProposition,
         JSON.stringify(validatedData.motifsPrincipaux || []),
+        validatedData.customMotif || null,
         JSON.stringify(validatedData.evaluationSituation || []),
         validatedData.commentaire || null,
         validatedData.temps2Date || null,

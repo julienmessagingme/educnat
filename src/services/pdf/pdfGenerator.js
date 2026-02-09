@@ -103,6 +103,7 @@ async function generateFichePDF(ficheId) {
       propositionData = {
         date_proposition: proposition.date_proposition,
         motifs_principaux: JSON.parse(proposition.motifs_principaux || '[]'),
+        custom_motif: proposition.custom_motif || null,
         evaluation_situation: JSON.parse(proposition.evaluation_situation || '[]'),
         commentaire: proposition.commentaire,
         temps2_date: proposition.temps2_date,

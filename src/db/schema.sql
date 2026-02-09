@@ -100,7 +100,36 @@ INSERT OR IGNORE INTO motifs_principaux (code, libelle, ordre) VALUES
   ('CHOIX_9', 'Rédaction fiche RAPT - prise en charge ESMS', 9),
   ('CHOIX_10', 'Accompagnement AESH par AESH référente TSA', 10);
 
+-- Table des analyses (Fiche d'analyse)
+CREATE TABLE IF NOT EXISTS analyses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_files TEXT,
+  nom_enfant TEXT,
+  prenom_enfant TEXT,
+  date_de_naissance TEXT,
+  etablissement_scolaire TEXT,
+  classe TEXT,
+  problematique TEXT,
+  motif TEXT,
+  historique TEXT,
+  situation TEXT,
+  partenaires TEXT,
+  contexte_familial TEXT,
+  difficultes TEXT,
+  points_appui TEXT,
+  en_classe TEXT,
+  avec_la_communaute TEXT,
+  demande_formulee TEXT,
+  contenu_brut TEXT,
+  pdf_output_path TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Index pour améliorer les performances
 CREATE INDEX IF NOT EXISTS idx_fiches_status ON fiches(status);
 CREATE INDEX IF NOT EXISTS idx_fiches_created_at ON fiches(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_propositions_fiche ON propositions(fiche_id);
+CREATE INDEX IF NOT EXISTS idx_analyses_status ON analyses(status);
+CREATE INDEX IF NOT EXISTS idx_analyses_created_at ON analyses(created_at DESC);

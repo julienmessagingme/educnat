@@ -119,5 +119,48 @@ export default {
   async getMotifsPrincipaux() {
     const response = await api.get('/propositions/reference/motifs-principaux')
     return response.data
+  },
+
+  // === Analyses (Fiche d'analyse) ===
+
+  async uploadAnalyseFiles(files) {
+    const formData = new FormData()
+    for (const file of files) {
+      formData.append('files', file)
+    }
+    const response = await api.post('/analyses/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000
+    })
+    return response.data
+  },
+
+  async getAnalyse(id) {
+    const response = await api.get(`/analyses/${id}`)
+    return response.data
+  },
+
+  async validateAnalyse(id, data) {
+    const response = await api.put(`/analyses/${id}/validate`, data)
+    return response.data
+  },
+
+  async getAnalyses(params = {}) {
+    const response = await api.get('/analyses', { params })
+    return response.data
+  },
+
+  async deleteAnalyse(id) {
+    const response = await api.delete(`/analyses/${id}`)
+    return response.data
+  },
+
+  async generateAnalysePDF(id) {
+    const response = await api.post(`/analyses/${id}/generate-pdf`)
+    return response.data
+  },
+
+  getAnalysePDFUrl(id) {
+    return `/api/analyses/${id}/pdf`
   }
 }

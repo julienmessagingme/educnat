@@ -74,7 +74,7 @@ async function fillWordTemplate(ficheData, propositionData = null) {
 
       // Temps 1 (si propositionData fourni)
       temps1_date: propositionData?.date_proposition ? formatTemps1Date(propositionData.date_proposition) : '',
-      temps1_motifs: propositionData?.motifs_principaux ? formatMotifs(propositionData.motifs_principaux, ficheData.prenom) : '',
+      temps1_motifs: propositionData?.motifs_principaux ? formatMotifs(propositionData.motifs_principaux, ficheData.prenom, propositionData.custom_motif) : '',
       temps1_commentaire: propositionData?.commentaire || '',
 
       // Temps 2
@@ -156,7 +156,7 @@ function dePrenom(prenom) {
 /**
  * Formate la liste des motifs principaux avec injection du prénom
  */
-function formatMotifs(motifsArray, prenom) {
+function formatMotifs(motifsArray, prenom, customMotif) {
   if (!Array.isArray(motifsArray) || motifsArray.length === 0) {
     return '';
   }
@@ -164,8 +164,8 @@ function formatMotifs(motifsArray, prenom) {
   const prenomFormate = dePrenom(prenom);
 
   const libelleMap = {
-    'CHOIX_1': "Le PRD propose le soutien de l'Équipe Mobile d'appui à la scolarité, EMAS33, pour répondre aux besoins de conseils à la communauté éducative afin d'accompagner la prise en charge des besoins éducatifs particuliers {prenom_enfant}…..L'EMAScol prendra contact à l'établissement pour déterminer les modalités d'action",
-    'CHOIX_2': "Le PRD propose le soutien de l'Equipe Mobile d'appui à la scolarité pour accompagner la communauté éducative dans l'élaboration de stratégies éducatives et comportementales adaptées aux besoins {prenom_enfant}. L'EMAScol prendra contact à l'équipe pour déterminer les modalités d'action.",
+    'CHOIX_1': "Le PRD propose le soutien de l'Équipe Mobile d'appui à la scolarité, EMAS33, pour répondre aux besoins de conseils à la communauté éducative afin d'accompagner la prise en charge des besoins éducatifs particuliers {prenom_enfant}. L'EMAS prendra contact avec l'établissement pour déterminer les modalités d'action.",
+    'CHOIX_2': "Le PRD propose le soutien de l'Equipe Mobile d'appui à la scolarité pour accompagner la communauté éducative dans l'élaboration de stratégies éducatives et comportementales adaptées aux besoins {prenom_enfant}. L'EMAS prendra contact avec l'équipe pour déterminer les modalités d'action.",
     'CHOIX_3': "Le PRD propose la visite de Madame Claire MAYOR TANNIERE, Professeure ressource TSA SDEI, qui prendra contact avec l'équipe éducative pour déterminer les modalités de sa première visite.",
     'CHOIX_4': "Le PRD propose la visite de Madame Campagne, Professeure ressource TND  SDEI, qui prendra contact avec l'équipe éducative pour déterminer les modalités de sa première visite.",
     'CHOIX_5': "Après étude de la situation {prenom_enfant}, le PRD propose un accompagnement conjoint, associant l'expertise du professeur ressource TND et l'accompagnement de l'EMAS. L'EMAS, en lien avec Mme Campagne ( PR TND ), prendra directement contact avec l'école.",
@@ -173,14 +173,18 @@ function formatMotifs(motifsArray, prenom) {
     'CHOIX_7': "Après étude de la situation {prenom_enfant}, le PRD propose un accompagnement conjoint, associant l'expertise d'un CPD du SDEI et l'accompagnement de l'EMAS. L'EMAS, en lien avec avec  le cpd du SDEI prendra directement contact avec l'école.",
     'CHOIX_8': "Afin d'accompagner au mieux la situation {prenom_enfant}. le prd propose un accompagnement par le pole TSA / TND avec l'appui de l'EMAS qui sera à même d'intervenir rapidement. L' équipe de l'EMAS prendra contact avec l'école, tout comme le pole TSA / TND.",
     'CHOIX_9': "Afin d'accélerer la demande de prise en charge en ESMS, le PRD propose la rédaction d'une fiche RAPT ( réponse accompagnée pour tous ) par l'enseignant référent du secteur à destination de l'IEN SDEI.",
-    'CHOIX_10': "Afin d'accompagner au mieux la situation {prenom_enfant} le prd propose un accompagnement de l'AESH par l'AESH référente TSA, Mme Caboblanco, qui prendra contact avec l'école et l'aesh afin de définir des modalités d'intervention."
+    'CHOIX_10': "Afin d'accompagner au mieux la situation {prenom_enfant} le prd propose un accompagnement de l'AESH par l'AESH référente TSA, Mme Caboblanco, qui prendra contact avec l'école et l'AESH afin de définir des modalités d'intervention."
   };
 
   return motifsArray
     .map(code => {
+      if (code === 'CHOIX_11') {
+        return customMotif || '';
+      }
       const texte = (libelleMap[code] || code).replace(/\{prenom_enfant\}/g, prenomFormate);
-      return `• ${texte}`;
+      return texte;
     })
+    .filter(line => line !== '')
     .join('\n');
 }
 

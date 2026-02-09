@@ -50,6 +50,16 @@
               <span>{{ motif.libelle }}</span>
             </label>
           </div>
+
+          <div v-if="formData.motifsPrincipaux.includes('CHOIX_11')" class="form-group custom-motif">
+            <label>Saisissez votre proposition *</label>
+            <textarea
+              v-model="formData.customMotif"
+              rows="4"
+              placeholder="Saisissez ici votre proposition personnalisée..."
+              class="textarea"
+            ></textarea>
+          </div>
         </div>
 
         <!-- Commentaire libre -->
@@ -166,8 +176,8 @@ const evaluationOptions = [
 
 // Les 10 choix PRD avec placeholder {prenom_enfant}
 const choixPRD = [
-  { code: 'CHOIX_1', libelle: "Le PRD propose le soutien de l'Équipe Mobile d'appui à la scolarité, EMAS33, pour répondre aux besoins de conseils à la communauté éducative afin d'accompagner la prise en charge des besoins éducatifs particuliers {prenom_enfant}…..L'EMAScol prendra contact à l'établissement pour déterminer les modalités d'action" },
-  { code: 'CHOIX_2', libelle: "Le PRD propose le soutien de l'Equipe Mobile d'appui à la scolarité pour accompagner la communauté éducative dans l'élaboration de stratégies éducatives et comportementales adaptées aux besoins {prenom_enfant}. L'EMAScol prendra contact à l'équipe pour déterminer les modalités d'action." },
+  { code: 'CHOIX_1', libelle: "Le PRD propose le soutien de l'Équipe Mobile d'appui à la scolarité, EMAS33, pour répondre aux besoins de conseils à la communauté éducative afin d'accompagner la prise en charge des besoins éducatifs particuliers {prenom_enfant}. L'EMAS prendra contact avec l'établissement pour déterminer les modalités d'action." },
+  { code: 'CHOIX_2', libelle: "Le PRD propose le soutien de l'Equipe Mobile d'appui à la scolarité pour accompagner la communauté éducative dans l'élaboration de stratégies éducatives et comportementales adaptées aux besoins {prenom_enfant}. L'EMAS prendra contact avec l'équipe pour déterminer les modalités d'action." },
   { code: 'CHOIX_3', libelle: "Le PRD propose la visite de Madame Claire MAYOR TANNIERE, Professeure ressource TSA SDEI, qui prendra contact avec l'équipe éducative pour déterminer les modalités de sa première visite." },
   { code: 'CHOIX_4', libelle: "Le PRD propose la visite de Madame Campagne, Professeure ressource TND  SDEI, qui prendra contact avec l'équipe éducative pour déterminer les modalités de sa première visite." },
   { code: 'CHOIX_5', libelle: "Après étude de la situation {prenom_enfant}, le PRD propose un accompagnement conjoint, associant l'expertise du professeur ressource TND et l'accompagnement de l'EMAS. L'EMAS, en lien avec Mme Campagne ( PR TND ), prendra directement contact avec l'école." },
@@ -175,7 +185,8 @@ const choixPRD = [
   { code: 'CHOIX_7', libelle: "Après étude de la situation {prenom_enfant}, le PRD propose un accompagnement conjoint, associant l'expertise d'un CPD du SDEI et l'accompagnement de l'EMAS. L'EMAS, en lien avec avec  le cpd du SDEI prendra directement contact avec l'école." },
   { code: 'CHOIX_8', libelle: "Afin d'accompagner au mieux la situation {prenom_enfant}. le prd propose un accompagnement par le pole TSA / TND avec l'appui de l'EMAS qui sera à même d'intervenir rapidement. L' équipe de l'EMAS prendra contact avec l'école, tout comme le pole TSA / TND." },
   { code: 'CHOIX_9', libelle: "Afin d'accélerer la demande de prise en charge en ESMS, le PRD propose la rédaction d'une fiche RAPT ( réponse accompagnée pour tous ) par l'enseignant référent du secteur à destination de l'IEN SDEI." },
-  { code: 'CHOIX_10', libelle: "Afin d'accompagner au mieux la situation {prenom_enfant} le prd propose un accompagnement de l'AESH par l'AESH référente TSA, Mme Caboblanco, qui prendra contact avec l'école et l'aesh afin de définir des modalités d'intervention." }
+  { code: 'CHOIX_10', libelle: "Afin d'accompagner au mieux la situation {prenom_enfant} le prd propose un accompagnement de l'AESH par l'AESH référente TSA, Mme Caboblanco, qui prendra contact avec l'école et l'AESH afin de définir des modalités d'intervention." },
+  { code: 'CHOIX_11', libelle: "Autre (texte libre)", isCustom: true }
 ]
 
 /**
@@ -194,6 +205,7 @@ function dePrenom(prenom) {
 const formData = ref({
   dateProposition: new Date().toISOString().split('T')[0], // Date du jour par défaut
   motifsPrincipaux: [],
+  customMotif: '',
   evaluationSituation: [],
   commentaire: '',
   temps2Date: '',
@@ -238,6 +250,7 @@ async function handleSubmit() {
       temps: 1,
       dateProposition: formData.value.dateProposition,
       motifsPrincipaux: formData.value.motifsPrincipaux,
+      customMotif: formData.value.customMotif,
       evaluationSituation: formData.value.evaluationSituation,
       commentaire: formData.value.commentaire,
       temps2Date: formData.value.temps2Date,
@@ -417,6 +430,11 @@ function formatDateDisplay(dateStr) {
 .checkbox-label span {
   flex: 1;
   font-size: 1rem;
+}
+
+.custom-motif {
+  margin-top: 0.5rem;
+  padding-left: 2rem;
 }
 
 .textarea {
