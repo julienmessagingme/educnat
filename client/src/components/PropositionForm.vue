@@ -226,6 +226,23 @@ onMounted(async () => {
       libelle: choix.libelle.replace(/\{prenom_enfant\}/g, prenomFormate)
     }))
 
+    // Charger la proposition existante si elle existe (réédition)
+    try {
+      const propResult = await api.getProposition(props.ficheId, 1)
+      if (propResult.success && propResult.proposition) {
+        const p = propResult.proposition
+        formData.value.dateProposition = p.date_proposition || formData.value.dateProposition
+        formData.value.motifsPrincipaux = p.motifs || []
+        formData.value.customMotif = p.custom_motif || ''
+        formData.value.evaluationSituation = p.evaluation || []
+        formData.value.commentaire = p.commentaire || ''
+        formData.value.temps2Date = p.temps2_date || ''
+        formData.value.temps2Commentaire = p.temps2_commentaire || ''
+      }
+    } catch (_) {
+      // Pas de proposition existante, on garde les valeurs par défaut
+    }
+
   } catch (err) {
     error.value = err.response?.data?.error || 'Erreur lors du chargement'
   } finally {

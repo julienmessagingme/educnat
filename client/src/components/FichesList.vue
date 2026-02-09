@@ -95,13 +95,21 @@
                   </button>
                   <a
                     v-if="fiche.pdf_output_path"
-                    :href="`/api/fiches/${fiche.id}/pdf`"
+                    :href="`/api/fiches/${fiche.id}/pdf?token=${token}&download=true`"
                     class="btn-icon btn-primary"
                     title="Télécharger le PDF"
                     target="_blank"
                   >
                     ⬇️
                   </a>
+                  <button
+                    v-if="fiche.status === 'validated' || fiche.status === 'completed'"
+                    class="btn-icon btn-edit"
+                    title="Rééditer"
+                    @click="emit('edit', fiche.id)"
+                  >
+                    ✏️
+                  </button>
                   <button
                     class="btn-icon btn-danger"
                     title="Supprimer"
@@ -185,8 +193,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
+
+const emit = defineEmits(['edit'])
+
+const token = computed(() => localStorage.getItem('token'))
 
 const fiches = ref([])
 const loading = ref(true)
@@ -565,6 +577,15 @@ function getDemandeLabel(code) {
 
 .btn-icon:hover {
   transform: scale(1.2);
+}
+
+.btn-edit {
+  color: #ff9800;
+}
+
+.btn-edit:hover {
+  background: #fff3e0;
+  transform: scale(1.3);
 }
 
 .btn-danger:hover {

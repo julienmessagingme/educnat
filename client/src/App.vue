@@ -114,7 +114,7 @@
 
       <!-- Onglet Historique -->
       <div v-if="currentTab === 'history'">
-        <FichesList />
+        <FichesList @edit="handleEditFiche" />
         <div style="margin-top: 2rem;">
           <AnalysesList />
         </div>
@@ -185,6 +185,14 @@ function handleFinishPreview() {
 function handleBackFromPreview() {
   pdfGenerated.value = false
   pdfUrl.value = ''
+}
+
+function handleEditFiche(ficheId) {
+  uploadedFicheId.value = ficheId
+  isValidated.value = true
+  pdfGenerated.value = false
+  pdfUrl.value = ''
+  currentTab.value = 'upload'
 }
 
 function resetUpload() {
