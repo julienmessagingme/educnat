@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <div class="login-card">
-      <h1>PRD Automation</h1>
+      <h1>Tableau de bord Cecile D.</h1>
       <p class="subtitle">Connectez-vous pour accéder à l'application</p>
 
       <form @submit.prevent="handleLogin" class="login-form">

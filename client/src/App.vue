@@ -7,8 +7,8 @@
     <header class="header">
       <div class="container header-row">
         <div>
-          <h1>📋 PRD Automation</h1>
-          <p>Traitement automatisé des fiches de saisine PRD</p>
+          <h1>Tableau de bord Cecile D.</h1>
+          <p>Flux de travail automatises</p>
         </div>
         <button class="btn-logout" @click="handleLogout">
           Déconnexion
@@ -23,7 +23,7 @@
           :class="{ active: currentTab === 'upload' }"
           @click="currentTab = 'upload'"
         >
-          📤 Upload
+          📤 Fiche de saisine
         </button>
         <button
           class="tab"
