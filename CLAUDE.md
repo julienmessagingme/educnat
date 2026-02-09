@@ -26,8 +26,19 @@ Upload Word/PDF → Extraction IA → Validation manuelle → Formulaire Temps 1
 
 1. **FileUpload.vue** : upload fichier → `POST /api/upload` → extraction wordExtractor + aiExtractor
 2. **DataValidation.vue** : édition données extraites → `PUT /api/fiches/:id/validate`
-3. **PropositionForm.vue** : Temps 1 (date, 10 motifs PRD, commentaire) + Temps 2 (évaluation, date, commentaire) → `POST /api/propositions`
+3. **PropositionForm.vue** : Temps 1 (date, 11 motifs PRD dont texte libre, commentaire) + Temps 2 (évaluation, date, commentaire) → `POST /api/propositions`
 4. **PDFPreview.vue** : iframe + téléchargement → `GET /api/fiches/:id/pdf?token=...`
+
+### Module Fiche d'Analyse
+
+```
+Upload multi-fichiers (1-10 PDF/DOCX) → Extraction IA → Validation manuelle → PDF
+```
+
+1. **AnalyseUpload.vue** : drag-drop multi-fichiers → `POST /api/analyses/upload` → extraction texte + IA
+2. **AnalyseValidation.vue** : édition des champs extraits → `PUT /api/analyses/:id/validate`
+3. **PDFPreview** : génération PDF → `POST /api/analyses/:id/generate-pdf` → `GET /api/analyses/:id/pdf`
+4. **AnalysesList.vue** : historique des analyses
 
 ## Structure clé
 
@@ -39,32 +50,44 @@ src/
   routes/fiches.js                    # CRUD fiches
   routes/pdf.js                       # Génération + affichage PDF
   routes/propositions.js              # CRUD propositions
+  routes/analyses.js                  # Upload multi-fichiers + CRUD analyses + génération PDF
   services/extraction/wordExtractor.js  # Parse XML Word, détecte [SURLIGNÉ], demandes, origine
   services/extraction/aiExtractor.js    # Prompt Claude pour extraction structurée
+  services/extraction/analyseAiExtractor.js  # Extraction texte (DOCX/PDF) + prompt Claude pour analyse
   services/template/wordTemplateFiller.js  # Injecte données dans template Word
+  services/template/analyseTemplateFiller.js  # Injecte données dans template fiche d'analyse
   services/pdf/pdfGenerator.js        # LibreOffice --headless --convert-to pdf
+  services/pdf/analysePdfGenerator.js  # Génération PDF fiche d'analyse
   db/database.js                      # Wrapper sql.js (API compatible better-sqlite3)
   db/init.js                          # Schéma + migrations auto au démarrage
   db/schema.sql                       # Tables: fiches, propositions, types_demande, motifs_principaux
   utils/validators.js                 # Zod: ficheSchema, propositionSchema
-  models/Fiche.js                     # CRUD model
+  utils/analyseValidators.js          # Zod: analyseSchema
+  models/Fiche.js                     # CRUD model fiches PRD
+  models/Analyse.js                   # CRUD model fiches d'analyse
 client/src/
   App.vue                             # Login gate + navigation tabs + workflow
   components/Login.vue                # Email/password → token localStorage
   components/FileUpload.vue           # Drag-drop upload
   components/DataValidation.vue       # Formulaire validation données
-  components/PropositionForm.vue      # 10 choix PRD + Temps 2
+  components/PropositionForm.vue      # 11 choix PRD (dont texte libre) + Temps 2
   components/PDFPreview.vue           # iframe PDF + download
-  components/FichesList.vue           # Historique + purge
+  components/FichesList.vue           # Historique + purge fiches PRD
+  components/AnalyseUpload.vue       # Drag-drop multi-fichiers (1-10)
+  components/AnalyseValidation.vue   # Formulaire validation données analyse
+  components/AnalysesList.vue        # Historique analyses
   services/api.js                     # Axios + intercepteur token Bearer
-public/templates/fiche-retour-template.docx  # Template Word avec placeholders
+public/templates/fiche-retour-template.docx    # Template Word PRD avec placeholders
+public/templates/fiche-analyse-template.docx  # Template Word fiche d'analyse
 ```
 
 ## BDD (SQLite via sql.js)
 
 **fiches** : nom, prenom, date_naissance, classe, etablissement_*, origine_*, demandes_formulees (JSON), status (pending→validated→completed), pdf_output_path
 
-**propositions** : fiche_id, temps, date_proposition, motifs_principaux (JSON), evaluation_situation (JSON), commentaire, temps2_date, temps2_commentaire
+**propositions** : fiche_id, temps, date_proposition, motifs_principaux (JSON), custom_motif, evaluation_situation (JSON), commentaire, temps2_date, temps2_commentaire
+
+**analyses** : source_files (JSON), nom_enfant, prenom_enfant, date_de_naissance, etablissement_scolaire, classe, problematique, motif, historique, situation, partenaires, contexte_familial, difficultes, points_appui, en_classe, avec_la_communaute, demande_formulee, contenu_brut, pdf_output_path, status
 
 **Attention** : sql.js charge toute la BDD en mémoire au démarrage. `saveDatabase()` écrit sur disque après chaque write. Les migrations sont dans `init.js` (ALTER TABLE avec try/catch).
 
@@ -78,9 +101,15 @@ Temps 1: `{temps1_date}`, `{temps1_motifs}`, `{temps1_commentaire}`
 Temps 2: `{temps2_date}`, `{temps2_commentaire}`
 Evaluation (X si cochée): `{eval1}`..`{eval5}`
 
-## Les 10 choix PRD (PropositionForm + wordTemplateFiller)
+## Les 11 choix PRD (PropositionForm + wordTemplateFiller)
 
-Codes CHOIX_1 à CHOIX_10. Contiennent `{prenom_enfant}` remplacé par `de Lalita` ou `d'Arthur` selon voyelle/consonne (fonction `dePrenom()`). Définis en dur dans le frontend ET le backend.
+Codes CHOIX_1 à CHOIX_10 : textes prédéfinis. Contiennent `{prenom_enfant}` remplacé par `de Lalita` ou `d'Arthur` selon voyelle/consonne (fonction `dePrenom()`). Définis en dur dans le frontend ET le backend.
+
+CHOIX_11 : "Autre (texte libre)" — l'utilisateur saisit son propre texte, stocké dans `custom_motif` en BDD. Apparaît au même endroit que les autres choix dans `{temps1_motifs}`.
+
+## Placeholders du template fiche d'analyse
+
+`{nom_enfant}`, `{prenom_enfant}`, `{date_de_naissance}`, `{etablissement_scolaire}`, `{classe}`, `{problématique}` (avec accent), `{motif}`, `{historique}`, `{situation}`, `{partenaires}`, `{contexte_familial}`, `{difficultes}`, `{points_appui}`, `{en_classe}`, `{avec_la_communaute}`, `{demande_formulee}`
 
 ## Auth
 

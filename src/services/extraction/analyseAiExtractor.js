@@ -44,6 +44,50 @@ async function extractTextFromFile(filePath) {
 }
 
 /**
+ * Échappe les retours à la ligne réels à l'intérieur des chaînes JSON
+ * pour éviter les erreurs de parsing (les puces • génèrent de vrais \n)
+ */
+function fixJsonNewlines(text) {
+  let result = '';
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (escaped) {
+      result += char;
+      escaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      result += char;
+      escaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      result += char;
+      continue;
+    }
+
+    if (inString && (char === '\n' || char === '\r')) {
+      if (char === '\r' && text[i + 1] === '\n') {
+        i++; // skip \r\n pair
+      }
+      result += '\\n';
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+/**
  * Extrait les 16 champs d'analyse depuis plusieurs documents via Claude AI
  */
 async function extractAnalyseWithAI(documents) {
@@ -64,10 +108,10 @@ Voici le contenu de ${documents.length} document(s) concernant un même élève.
   "dateDeNaissance": "Date de naissance (format libre)",
   "etablissementScolaire": "Nom de l'établissement scolaire",
   "classe": "Classe de l'élève",
-  "problematique": "Synthèse de la problématique principale de l'élève",
+  "problematique": "Synthèse de la problématique principale",
   "motif": "Motif de la demande / saisine",
   "historique": "Historique de la situation (parcours, prises en charge antérieures)",
-  "situation": "Description de la situation actuelle de l'élève",
+  "situation": "Situation actuelle de l'élève + dates d'obtention des accords (MDPH, CDAPH, notifications, renouvellements, etc.)",
   "partenaires": "Partenaires impliqués (professionnels, services, institutions)",
   "contexteFamilial": "Contexte familial de l'élève",
   "difficultes": "Difficultés identifiées (scolaires, comportementales, relationnelles)",
@@ -78,10 +122,15 @@ Voici le contenu de ${documents.length} document(s) concernant un même élève.
 }
 
 RÈGLES :
-1. Pour chaque champ descriptif (problematique, motif, historique, situation, partenaires, contexteFamilial, difficultes, pointsAppui, enClasse, avecLaCommunaute, demandeFormulee), fais une synthèse de 100 mots MAXIMUM.
-2. Si une information n'est pas trouvée dans les documents, retourne une chaîne vide "".
-3. Croise les informations de tous les documents pour produire une synthèse complète.
-4. Retourne UNIQUEMENT le JSON, rien d'autre.
+1. Pour chaque champ descriptif (problematique, motif, historique, situation, partenaires, contexteFamilial, difficultes, pointsAppui, enClasse, avecLaCommunaute, demandeFormulee), retourne une liste à puces ULTRA SYNTHÉTIQUE. Chaque puce commence par "• " et contient une info clé en quelques mots. Maximum 5-6 puces par champ. Sépare les puces par un retour à la ligne "\n".
+2. Pour le champ "situation", inclus impérativement les dates d'obtention des accords trouvées dans les documents (accords MDPH, CDAPH, notifications AESH, renouvellements, PPS, etc.) sous forme de puces avec les dates.
+3. Si une information n'est pas trouvée dans les documents, retourne une chaîne vide "".
+4. Croise les informations de tous les documents pour produire une synthèse complète.
+5. Retourne UNIQUEMENT le JSON, rien d'autre.
+
+EXEMPLE DE FORMAT ATTENDU pour un champ :
+"difficultes": "• Troubles du comportement en classe\n• Difficultés relationnelles avec les pairs\n• Retard scolaire en lecture et mathématiques"
+"situation": "• Scolarisé en CE2 avec AESH 12h/semaine\n• Accord MDPH obtenu le 15/03/2024\n• Notification AESH renouvelée le 10/09/2024\n• Suivi orthophoniste 2x/semaine"
 
 Voici le contenu des documents :
 
@@ -106,7 +155,10 @@ Réponds UNIQUEMENT avec le JSON, rien d'autre.`;
 
     let extractedData;
     try {
-      const cleanedText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      let cleanedText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      // Échapper les retours à la ligne à l'intérieur des chaînes JSON
+      // (les puces génèrent de vrais \n qui cassent JSON.parse)
+      cleanedText = fixJsonNewlines(cleanedText);
       extractedData = JSON.parse(cleanedText);
     } catch (parseError) {
       console.error('❌ Erreur de parsing JSON:', parseError.message);
